@@ -1,0 +1,31 @@
+---
+# LAB 6 - block / rescue / always, ignore_errors, failed_when, retries.
+- name: Lab 6 - handling failure
+  hosts: lab
+  become: true
+  tasks:
+    - name: Try something that may fail
+      block:
+        - name: Install a package that does not exist
+          ansible.builtin.apt:
+            name: this-package-does-not-exist
+            state: present
+      rescue:
+        - name: Recover - log what happened
+          ansible.builtin.debug:
+            msg: "Install failed on {{ inventory_hostname }}, continuing safely"
+      always:
+        - name: Always runs
+          ansible.builtin.debug:
+            msg: "Cleanup step"
+
+    - name: Wait until port 22 answers (retries)
+      ansible.builtin.wait_for:
+        port: 22
+        timeout: 10
+
+    - name: Custom failure condition
+      ansible.builtin.command: echo "status=OK"
+      register: status_out
+      changed_when: false
+      failed_when: "'OK' not in status_out.stdout"

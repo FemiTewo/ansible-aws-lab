@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: FemiTewo
+  description: Nginx web server
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions: [jammy]
+  galaxy_tags: [web]
+dependencies: []

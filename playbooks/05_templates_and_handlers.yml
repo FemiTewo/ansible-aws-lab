@@ -1,0 +1,19 @@
+---
+# LAB 5 - Jinja2 templates: one template, different output per host. Change nginx_site_title in
+# inventory/group_vars/web.yml and re-run: only the page changes, nginx reloads once.
+- name: Lab 5 - templates
+  hosts: web
+  become: true
+  tasks:
+    - name: Render a status page
+      ansible.builtin.template:
+        src: ../roles/nginx/templates/index.html.j2
+        dest: /var/www/html/index.html
+        mode: "0644"
+      notify: Reload nginx
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

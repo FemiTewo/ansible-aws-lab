@@ -1,0 +1,31 @@
+---
+# LAB 3 - Install, configure, start a service the plain (no role) way, using a handler.
+- name: Lab 3 - nginx without roles
+  hosts: web
+  become: true
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Custom welcome page
+      ansible.builtin.copy:
+        content: "<h1>Hello from {{ inventory_hostname }}</h1>\n"
+        dest: /var/www/html/index.html
+        mode: "0644"
+      notify: Restart nginx
+
+    - name: Start and enable nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted

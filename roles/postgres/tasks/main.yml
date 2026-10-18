@@ -1,0 +1,53 @@
+---
+- name: Install PostgreSQL and the Python driver Ansible needs
+  ansible.builtin.apt:
+    name: [postgresql, postgresql-contrib, python3-psycopg2, acl]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Ensure PostgreSQL is running and enabled
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+  become: true
+
+- name: Create application user
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_db_user }}"
+    password: "{{ postgres_db_password }}"
+  become: true
+  become_user: postgres
+  no_log: true
+
+- name: Create application database owned by that user
+  community.postgresql.postgresql_db:
+    name: "{{ postgres_db_name }}"
+    owner: "{{ postgres_db_user }}"
+  become: true
+  become_user: postgres
+
+- name: Find the postgres config directory
+  ansible.builtin.find:
+    paths: /etc/postgresql
+    file_type: directory
+    recurse: false
+    patterns: ["[0-9]*"]
+  register: postgres_versions
+
+- name: Listen on the private network
+  ansible.builtin.lineinfile:
+    path: "{{ postgres_versions.files[0].path }}/main/postgresql.conf"
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+  become: true
+  notify: Restart postgresql
+
+- name: Allow app user from the VPC
+  ansible.builtin.lineinfile:
+    path: "{{ postgres_versions.files[0].path }}/main/pg_hba.conf"
+    line: "host {{ postgres_db_name }} {{ postgres_db_user }} {{ postgres_allowed_cidr }} scram-sha-256"
+  become: true
+  notify: Restart postgresql

@@ -1,0 +1,26 @@
+---
+# LAB 8 - serial (rolling), tags, check mode and diff.
+#   ansible-playbook playbooks/08_rolling_update_tags.yml --check --diff
+#   ansible-playbook playbooks/08_rolling_update_tags.yml --tags packages
+- name: Lab 8 - safe rollout
+  hosts: lab
+  become: true
+  serial: 1
+  max_fail_percentage: 0
+  tasks:
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: safe
+        update_cache: true
+      tags: [packages]
+
+    - name: Check whether a reboot is needed
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_flag
+      tags: [reboot]
+
+    - name: Report reboot status
+      ansible.builtin.debug:
+        msg: "Reboot required: {{ reboot_flag.stat.exists }}"
+      tags: [reboot]

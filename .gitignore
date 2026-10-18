@@ -1,0 +1,7 @@
+*.pem
+*.key
+.vault_pass
+vars/secrets.yml
+inventory/hosts.ini
+*.retry
+.venv/

@@ -1,0 +1,70 @@
+---
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Deploy site config
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: /etc/nginx/sites-available/lab.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Reload nginx
+
+- name: Enable site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/lab.conf
+    dest: /etc/nginx/sites-enabled/lab.conf
+    state: link
+  become: true
+  notify: Reload nginx
+
+- name: Remove default site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: true
+  notify: Reload nginx
+
+- name: Create web root
+  ansible.builtin.file:
+    path: /var/www/lab
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  become: true
+
+- name: Deploy index page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/lab/index.html
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  become: true
+
+- name: Validate nginx config
+  ansible.builtin.command: nginx -t
+  become: true
+  changed_when: false
+
+- name: Ensure nginx is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true
+
+- name: Check the site answers locally
+  ansible.builtin.uri:
+    url: "http://localhost:{{ nginx_port }}/"
+    return_content: true
+  register: nginx_check_result
+  failed_when: nginx_site_title not in nginx_check_result.content

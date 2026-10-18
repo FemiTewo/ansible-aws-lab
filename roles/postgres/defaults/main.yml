@@ -1,0 +1,6 @@
+---
+postgres_db_name: appdb
+postgres_db_user: appuser
+# Override with vault: vault_db_password
+postgres_db_password: "{{ vault_db_password | default('ChangeMe-lab-only') }}"
+postgres_allowed_cidr: 172.31.0.0/16

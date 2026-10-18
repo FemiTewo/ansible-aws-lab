@@ -1,0 +1,10 @@
+<!doctype html>
+<html>
+<head><title>{{ nginx_site_title }}</title></head>
+<body>
+  <h1>{{ nginx_site_title }}</h1>
+  <p>Served by <b>{{ inventory_hostname }}</b> ({{ ansible_facts['hostname'] }})</p>
+  <p>OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}</p>
+  <p>Memory: {{ ansible_facts['memtotal_mb'] }} MB, CPUs: {{ ansible_facts['processor_vcpus'] }}</p>
+</body>
+</html>

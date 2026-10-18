@@ -1,0 +1,4 @@
+---
+common_admin_user: deploy
+common_packages: [curl, git, htop, vim, unzip, jq]
+common_timezone: UTC

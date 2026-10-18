@@ -1,0 +1,3 @@
+*** {{ inventory_hostname }} ({{ ansible_facts['default_ipv4']['address'] | default('n/a') }}) ***
+Managed by Ansible - manual changes will be overwritten.
+OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}

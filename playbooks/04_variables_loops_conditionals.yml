@@ -1,0 +1,38 @@
+---
+# LAB 4 - Variables, loops, when, register, and facts-based decisions.
+- name: Lab 4 - logic
+  hosts: lab
+  become: true
+  vars:
+    users_to_create:
+      - { name: bob, shell: /bin/bash }
+      - { name: carol, shell: /bin/sh }
+    packages_by_group:
+      web: [nginx-common]
+      db: [postgresql-client]
+  tasks:
+    - name: Create users with a loop
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        shell: "{{ item.shell }}"
+      loop: "{{ users_to_create }}"
+
+    - name: Install packages that depend on the inventory group
+      ansible.builtin.apt:
+        name: "{{ packages_by_group[item] }}"
+        state: present
+      loop: "{{ group_names | intersect(packages_by_group.keys() | list) }}"
+
+    - name: Only on hosts with more than 500 MB RAM
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} has {{ ansible_facts['memtotal_mb'] }} MB"
+      when: ansible_facts['memtotal_mb'] > 500
+
+    - name: Check whether a file exists
+      ansible.builtin.stat:
+        path: /etc/nginx/nginx.conf
+      register: nginx_conf
+
+    - name: Report result
+      ansible.builtin.debug:
+        msg: "nginx.conf present: {{ nginx_conf.stat.exists }}"

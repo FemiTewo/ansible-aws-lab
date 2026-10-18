@@ -1,0 +1,50 @@
+---
+# LAB 2 - Core modules: apt, user, file, copy, lineinfile. Run it TWICE and watch changed=0 (idempotency).
+- name: Lab 2 - packages, users and files
+  hosts: lab
+  become: true
+  tasks:
+    - name: Install tools
+      ansible.builtin.apt:
+        name: [tree, htop, curl]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Create group
+      ansible.builtin.group:
+        name: devops
+        state: present
+
+    - name: Create user
+      ansible.builtin.user:
+        name: alice
+        groups: devops
+        shell: /bin/bash
+        state: present
+
+    - name: Create a project directory
+      ansible.builtin.file:
+        path: /opt/labproject
+        state: directory
+        owner: alice
+        group: devops
+        mode: "0775"
+
+    - name: Drop a file with fixed content
+      ansible.builtin.copy:
+        content: "Managed by Ansible\n"
+        dest: /opt/labproject/README.txt
+        owner: alice
+        group: devops
+        mode: "0644"
+
+    - name: Ensure a line exists in a file
+      ansible.builtin.lineinfile:
+        path: /opt/labproject/notes.txt
+        line: "Lab 2 complete"
+        create: true
+        owner: alice
+        group: devops
+        mode: "0644"
+        state: present

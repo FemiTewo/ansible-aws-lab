@@ -1,0 +1,23 @@
+---
+# LAB 1 - Your first playbook: gather facts and print them.
+# Run: ansible-playbook playbooks/01_facts_and_adhoc.yml
+- name: Lab 1 - facts and debug
+  hosts: lab
+  gather_facts: true
+  tasks:
+    - name: Show OS and IP of every host
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} runs {{ ansible_facts['distribution'] }}
+          {{ ansible_facts['distribution_version'] }} with
+          {{ ansible_facts['memtotal_mb'] }} MB RAM at
+          {{ ansible_facts['default_ipv4']['address'] }}
+
+    - name: Run a command and capture it
+      ansible.builtin.command: uptime
+      register: uptime_out
+      changed_when: false
+
+    - name: Print uptime
+      ansible.builtin.debug:
+        var: uptime_out.stdout

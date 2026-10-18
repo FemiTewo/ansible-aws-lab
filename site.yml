@@ -1,0 +1,16 @@
+---
+# Capstone: builds the whole stack with roles. Run: ansible-playbook site.yml
+- name: Baseline for every server
+  hosts: lab
+  roles:
+    - common
+
+- name: Web tier
+  hosts: web
+  roles:
+    - nginx
+
+- name: Database tier
+  hosts: db
+  roles:
+    - postgres
